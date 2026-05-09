@@ -1,0 +1,30 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#f8fafc"/>
+  <text x="70" y="88" font-size="46" font-weight="700" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#0f172a">大模型调用层的推荐结构</text>
+  <rect x="80" y="160" width="290" height="110" rx="20" fill="#dbeafe" stroke="#93c5fd"/>
+  <text x="150" y="225" font-size="38" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#1d4ed8">业务模块</text>
+  <rect x="430" y="120" width="340" height="520" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="505" y="180" font-size="40" font-weight="700" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#111827">AI Gateway</text>
+  <rect x="470" y="220" width="260" height="68" rx="14" fill="#eff6ff"/>
+  <rect x="470" y="316" width="260" height="68" rx="14" fill="#eff6ff"/>
+  <rect x="470" y="412" width="260" height="68" rx="14" fill="#eff6ff"/>
+  <rect x="470" y="508" width="260" height="68" rx="14" fill="#eff6ff"/>
+  <text x="545" y="264" font-size="28" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#0f172a">统一接口</text>
+  <text x="545" y="360" font-size="28" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#0f172a">模型路由</text>
+  <text x="545" y="456" font-size="28" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#0f172a">日志审计</text>
+  <text x="545" y="552" font-size="28" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#0f172a">限流重试</text>
+  <rect x="840" y="130" width="270" height="90" rx="18" fill="#dcfce7" stroke="#86efac"/>
+  <rect x="840" y="270" width="270" height="90" rx="18" fill="#dcfce7" stroke="#86efac"/>
+  <rect x="840" y="410" width="270" height="90" rx="18" fill="#dcfce7" stroke="#86efac"/>
+  <rect x="840" y="550" width="270" height="90" rx="18" fill="#dcfce7" stroke="#86efac"/>
+  <text x="912" y="185" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#166534">OpenAI Provider</text>
+  <text x="925" y="325" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#166534">Qwen Provider</text>
+  <text x="900" y="465" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#166534">DeepSeek Provider</text>
+  <text x="905" y="605" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#166534">Ollama Provider</text>
+  <path d="M370 215 L430 215" stroke="#334155" stroke-width="6"/>
+  <path d="M770 175 L840 175" stroke="#334155" stroke-width="6"/>
+  <path d="M770 315 L840 315" stroke="#334155" stroke-width="6"/>
+  <path d="M770 455 L840 455" stroke="#334155" stroke-width="6"/>
+  <path d="M770 595 L840 595" stroke="#334155" stroke-width="6"/>
+  <text x="80" y="705" font-size="28" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#475569">业务只依赖 Gateway，厂商差异全部沉到 Provider 适配层。</text>
+</svg>

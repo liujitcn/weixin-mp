@@ -1,0 +1,22 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#f8fafc"/>
+  <text x="70" y="88" font-size="46" font-weight="700" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#0f172a">调用层的边界：什么该放，什么不该放</text>
+  <rect x="90" y="150" width="470" height="520" rx="24" fill="#ecfdf5" stroke="#86efac" stroke-width="3"/>
+  <rect x="640" y="150" width="470" height="520" rx="24" fill="#fff7ed" stroke="#fdba74" stroke-width="3"/>
+  <text x="235" y="212" font-size="40" font-weight="700" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#166534">应该放进调用层</text>
+  <text x="790" y="212" font-size="40" font-weight="700" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#c2410c">不应该放进调用层</text>
+  <text x="130" y="290" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- Provider 适配</text>
+  <text x="130" y="345" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- 模型路由</text>
+  <text x="130" y="400" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- 超时 / 重试 / 限流</text>
+  <text x="130" y="455" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- Token 统计</text>
+  <text x="130" y="510" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- 日志与审计</text>
+  <text x="130" y="565" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- 流式协议转换</text>
+  <text x="130" y="620" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#14532d">- 错误归一化</text>
+  <text x="680" y="290" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 具体业务 Prompt</text>
+  <text x="680" y="345" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 订单 / 合同领域逻辑</text>
+  <text x="680" y="400" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 知识库召回策略</text>
+  <text x="680" y="455" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 页面展示格式拼装</text>
+  <text x="680" y="510" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 前端交互细节</text>
+  <text x="680" y="565" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 业务审批规则</text>
+  <text x="680" y="620" font-size="30" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" fill="#9a3412">- 场景专属知识判断</text>
+</svg>
