@@ -2,8 +2,6 @@
 
 ---
 
-这是 `AI 网关专题` 的第 6 篇。
-
 AI 网关做到这一步，通常已经开始有这些能力了：
 
 - 统一请求和响应结构
@@ -78,9 +76,9 @@ AI 网关做到这一步，通常已经开始有这些能力了：
 
 例如：
 
-```go
-return nil, err
-```
+代码示例：
+
+    return nil, err
 
 短期最省事。
 
@@ -94,15 +92,15 @@ return nil, err
 
 例如：
 
-```go
-return fmt.Errorf("call qwen failed: %w", err)
-```
+代码示例：
+
+    return fmt.Errorf("call qwen failed: %w", err)
 
 再上一层：
 
-```go
-return fmt.Errorf("gateway chat failed: %w", err)
-```
+代码示例：
+
+    return fmt.Errorf("gateway chat failed: %w", err)
 
 最后你拿到一长串上下文，但仍然回答不了：
 
@@ -195,28 +193,28 @@ return fmt.Errorf("gateway chat failed: %w", err)
 
 例如：
 
-```go
-type ErrorCode string
+代码示例：
 
-const (
-	ErrorCodeInvalidRequest      ErrorCode = "invalid_request"
-	ErrorCodeUnauthorized        ErrorCode = "unauthorized"
-	ErrorCodeRateLimited         ErrorCode = "rate_limited"
-	ErrorCodeTimeout             ErrorCode = "timeout"
-	ErrorCodeProviderUnavailable ErrorCode = "provider_unavailable"
-	ErrorCodeModelNotFound       ErrorCode = "model_not_found"
-	ErrorCodeInternal            ErrorCode = "internal"
-)
-
-type GatewayError struct {
-	Code      ErrorCode
-	Message   string
-	Provider  string
-	Model     string
-	Retryable bool
-	Cause     error
-}
-```
+    type ErrorCode string
+    
+    const (
+    	ErrorCodeInvalidRequest      ErrorCode = "invalid_request"
+    	ErrorCodeUnauthorized        ErrorCode = "unauthorized"
+    	ErrorCodeRateLimited         ErrorCode = "rate_limited"
+    	ErrorCodeTimeout             ErrorCode = "timeout"
+    	ErrorCodeProviderUnavailable ErrorCode = "provider_unavailable"
+    	ErrorCodeModelNotFound       ErrorCode = "model_not_found"
+    	ErrorCodeInternal            ErrorCode = "internal"
+    )
+    
+    type GatewayError struct {
+    	Code      ErrorCode
+    	Message   string
+    	Provider  string
+    	Model     string
+    	Retryable bool
+    	Cause     error
+    }
 
 这一版里，最有价值的字段通常是：
 
@@ -413,11 +411,3 @@ Provider 层最应该做的，不是发明新错误体系。
 > **先把错误统一成稳定语义，再去补上下文、提示文案和降级策略。**
 
 这样整个网关的行为才会越来越清楚，而不是越来越像一团字符串。
-
-下一篇，我们就继续讲一个所有团队迟早都会关心的问题：
-
-> **AI 网关里，Token 成本统计到底应该放在哪一层。**
-
-顺着这一组继续读，下一篇就在这里：
-
-- 《AI 网关如何统计 Token 成本》

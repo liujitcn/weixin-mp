@@ -2,8 +2,6 @@
 
 ---
 
-这是 `AI 网关专题` 的第 2 篇。
-
 上一篇我们先把一件更底层的事讲清楚了：
 
 > **Go 后端里，为什么要先把大模型调用收口成统一调用层。**
@@ -14,14 +12,14 @@
 
 很多团队第一次做 AI 聊天时，后端代码大概是这样的：
 
-```go
-resp, err := gateway.Chat(ctx, req)
-if err != nil {
-	return err
-}
+代码示例：
 
-return c.JSON(http.StatusOK, resp)
-```
+    resp, err := gateway.Chat(ctx, req)
+    if err != nil {
+    	return err
+    }
+    
+    return c.JSON(http.StatusOK, resp)
 
 这种方式当然能跑。
 
@@ -126,12 +124,12 @@ return c.JSON(http.StatusOK, resp)
 
 很多第一版实现，通常是这样长出来的：
 
-```text
-前端发起请求
-后端直接调用模型 SDK 的 stream 接口
-拿到一段内容就 write 一次
-最后 close 掉连接
-```
+代码示例：
+
+    前端发起请求
+    后端直接调用模型 SDK 的 stream 接口
+    拿到一段内容就 write 一次
+    最后 close 掉连接
 
 Demo 阶段这没什么问题。
 
@@ -247,14 +245,14 @@ WebSocket 更强，但也更重。
 
 把它拆开看，会更清楚：
 
-```text
-浏览器
-  -> HTTP Handler
-  -> App Service / Biz
-  -> AI Gateway
-  -> Provider Adapter
-  -> Model Vendor Stream
-```
+代码示例：
+
+    浏览器
+      -> HTTP Handler
+      -> App Service / Biz
+      -> AI Gateway
+      -> Provider Adapter
+      -> Model Vendor Stream
 
 每一层都只做自己那一层的事。
 
@@ -322,37 +320,37 @@ WebSocket 更强，但也更重。
 
 例如：
 
-```go
-type StreamEvent string
+代码示例：
 
-const (
-	StreamEventDelta StreamEvent = "delta"
-	StreamEventDone  StreamEvent = "done"
-	StreamEventError StreamEvent = "error"
-)
-
-// StreamChunk 表示网关对外统一的流式返回结构。
-type StreamChunk struct {
-	Event   StreamEvent `json:"event"`
-	Content string      `json:"content,omitempty"`
-	TraceID string      `json:"traceID,omitempty"`
-	Model   string      `json:"model,omitempty"`
-	Done    bool        `json:"done,omitempty"`
-	Error   *ErrorInfo  `json:"error,omitempty"`
-	Usage   *Usage      `json:"usage,omitempty"`
-}
-
-type ErrorInfo struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-}
-
-type Usage struct {
-	PromptTokens     int64 `json:"promptTokens"`
-	CompletionTokens int64 `json:"completionTokens"`
-	TotalTokens      int64 `json:"totalTokens"`
-}
-```
+    type StreamEvent string
+    
+    const (
+    	StreamEventDelta StreamEvent = "delta"
+    	StreamEventDone  StreamEvent = "done"
+    	StreamEventError StreamEvent = "error"
+    )
+    
+    // StreamChunk 表示网关对外统一的流式返回结构。
+    type StreamChunk struct {
+    	Event   StreamEvent `json:"event"`
+    	Content string      `json:"content,omitempty"`
+    	TraceID string      `json:"traceID,omitempty"`
+    	Model   string      `json:"model,omitempty"`
+    	Done    bool        `json:"done,omitempty"`
+    	Error   *ErrorInfo  `json:"error,omitempty"`
+    	Usage   *Usage      `json:"usage,omitempty"`
+    }
+    
+    type ErrorInfo struct {
+    	Code    string `json:"code"`
+    	Message string `json:"message"`
+    }
+    
+    type Usage struct {
+    	PromptTokens     int64 `json:"promptTokens"`
+    	CompletionTokens int64 `json:"completionTokens"`
+    	TotalTokens      int64 `json:"totalTokens"`
+    }
 
 这个结构里，第一版最值得保留的字段有四类：
 
@@ -382,17 +380,17 @@ type Usage struct {
 
 我们先看一版很实用的接口抽象。
 
-```go
-// StreamWriter 负责把统一 chunk 发给上层调用方。
-type StreamWriter interface {
-	WriteChunk(ctx context.Context, chunk *StreamChunk) error
-}
+代码示例：
 
-// Gateway 定义对外暴露的流式调用能力。
-type Gateway interface {
-	StreamChat(ctx context.Context, req *ChatRequest, writer StreamWriter) error
-}
-```
+    // StreamWriter 负责把统一 chunk 发给上层调用方。
+    type StreamWriter interface {
+    	WriteChunk(ctx context.Context, chunk *StreamChunk) error
+    }
+    
+    // Gateway 定义对外暴露的流式调用能力。
+    type Gateway interface {
+    	StreamChat(ctx context.Context, req *ChatRequest, writer StreamWriter) error
+    }
 
 这个抽象有两个好处。
 
@@ -426,89 +424,89 @@ type Gateway interface {
 
 一版够用、而且边界比较清晰的写法可以是这样：
 
-```go
-type SSEWriter struct {
-	writer  http.ResponseWriter
-	flusher http.Flusher
-}
+代码示例：
 
-func NewSSEWriter(w http.ResponseWriter) (*SSEWriter, error) {
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		return nil, errors.New("response writer does not support flush")
-	}
-
-	return &SSEWriter{
-		writer:  w,
-		flusher: flusher,
-	}, nil
-}
-
-func (w *SSEWriter) WriteChunk(ctx context.Context, chunk *StreamChunk) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
-	payload, err := json.Marshal(chunk)
-	if err != nil {
-		return fmt.Errorf("marshal stream chunk: %w", err)
-	}
-
-	_, err = fmt.Fprintf(w.writer, "event: %s\n", chunk.Event)
-	if err != nil {
-		return fmt.Errorf("write sse event: %w", err)
-	}
-
-	_, err = fmt.Fprintf(w.writer, "data: %s\n\n", payload)
-	if err != nil {
-		return fmt.Errorf("write sse data: %w", err)
-	}
-
-	w.flusher.Flush()
-	return nil
-}
-```
+    type SSEWriter struct {
+    	writer  http.ResponseWriter
+    	flusher http.Flusher
+    }
+    
+    func NewSSEWriter(w http.ResponseWriter) (*SSEWriter, error) {
+    	flusher, ok := w.(http.Flusher)
+    	if !ok {
+    		return nil, errors.New("response writer does not support flush")
+    	}
+    
+    	return &SSEWriter{
+    		writer:  w,
+    		flusher: flusher,
+    	}, nil
+    }
+    
+    func (w *SSEWriter) WriteChunk(ctx context.Context, chunk *StreamChunk) error {
+    	select {
+    	case <-ctx.Done():
+    		return ctx.Err()
+    	default:
+    	}
+    
+    	payload, err := json.Marshal(chunk)
+    	if err != nil {
+    		return fmt.Errorf("marshal stream chunk: %w", err)
+    	}
+    
+    	_, err = fmt.Fprintf(w.writer, "event: %s\n", chunk.Event)
+    	if err != nil {
+    		return fmt.Errorf("write sse event: %w", err)
+    	}
+    
+    	_, err = fmt.Fprintf(w.writer, "data: %s\n\n", payload)
+    	if err != nil {
+    		return fmt.Errorf("write sse data: %w", err)
+    	}
+    
+    	w.flusher.Flush()
+    	return nil
+    }
 
 HTTP 入口层则可以这样收口：
 
-```go
-func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+代码示例：
 
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("X-Accel-Buffering", "no")
-
-	writer, err := NewSSEWriter(w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	req, err := h.buildChatRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = h.gateway.StreamChat(ctx, req, writer)
-	if err != nil {
-		streamErr := writer.WriteChunk(ctx, &StreamChunk{
-			Event: StreamEventError,
-			Error: &ErrorInfo{
-				Code:    "stream_failed",
-				Message: err.Error(),
-			},
-		})
-		if streamErr != nil {
-			return
-		}
-	}
-}
-```
+    func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
+    	ctx := r.Context()
+    
+    	w.Header().Set("Content-Type", "text/event-stream")
+    	w.Header().Set("Cache-Control", "no-cache")
+    	w.Header().Set("Connection", "keep-alive")
+    	w.Header().Set("X-Accel-Buffering", "no")
+    
+    	writer, err := NewSSEWriter(w)
+    	if err != nil {
+    		http.Error(w, err.Error(), http.StatusInternalServerError)
+    		return
+    	}
+    
+    	req, err := h.buildChatRequest(r)
+    	if err != nil {
+    		http.Error(w, err.Error(), http.StatusBadRequest)
+    		return
+    	}
+    
+    	err = h.gateway.StreamChat(ctx, req, writer)
+    	if err != nil {
+    		streamErr := writer.WriteChunk(ctx, &StreamChunk{
+    			Event: StreamEventError,
+    			Error: &ErrorInfo{
+    				Code:    "stream_failed",
+    				Message: err.Error(),
+    			},
+    		})
+    		if streamErr != nil {
+    			return
+    		}
+    	}
+    }
 
 这个实现里，有几个点很关键。
 
@@ -544,26 +542,26 @@ func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
 
 例如厂商返回：
 
-```json
-{
-  "choices": [
+代码示例：
+
     {
-      "delta": {
-        "content": "你好"
-      }
+      "choices": [
+        {
+          "delta": {
+            "content": "你好"
+          }
+        }
+      ]
     }
-  ]
-}
-```
 
 适配层应该把它转成：
 
-```json
-{
-  "event": "delta",
-  "content": "你好"
-}
-```
+代码示例：
+
+    {
+      "event": "delta",
+      "content": "你好"
+    }
 
 这样前端永远只看统一协议。
 
@@ -607,17 +605,17 @@ func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
 
 例如：
 
-```json
-{
-  "event": "done",
-  "done": true,
-  "usage": {
-    "promptTokens": 120,
-    "completionTokens": 260,
-    "totalTokens": 380
-  }
-}
-```
+代码示例：
+
+    {
+      "event": "done",
+      "done": true,
+      "usage": {
+        "promptTokens": 120,
+        "completionTokens": 260,
+        "totalTokens": 380
+      }
+    }
 
 这样前端逻辑会清楚很多。
 
@@ -766,11 +764,3 @@ func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
 - RAG 引用来源
 
 整个系统才不会越长越乱。
-
-下一篇，我们可以继续往前走一步：
-
-> **AI 网关里，Token 成本统计到底应该放在哪一层。**
-
-如果你想按专题顺着往下走，更推荐先接这篇：
-
-- 《Provider 抽象该怎么设计》

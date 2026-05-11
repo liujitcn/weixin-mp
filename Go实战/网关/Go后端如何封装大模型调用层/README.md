@@ -2,20 +2,18 @@
 
 ---
 
-这是 `AI 网关专题` 的第 1 篇。
-
 很多团队开始做 AI，第一步往往都很直接：
 
 先把模型接口调通。
 
 代码通常也很直接：
 
-```go
-resp, err := client.ChatCompletion(ctx, req)
-if err != nil {
-	return err
-}
-```
+代码示例：
+
+    resp, err := client.ChatCompletion(ctx, req)
+    if err != nil {
+    	return err
+    }
 
 如果只是为了验证效果，这样写一点问题都没有。
 
@@ -199,33 +197,33 @@ if err != nil {
 
 如果按服务化方式来落，我会更建议先把契约收敛成一版清晰的 proto，而不是先写内部接口。
 
-```proto
-service ModelGateway {
-  rpc Chat(ChatRequest) returns (ChatResponse);
-  rpc StreamChat(ChatRequest) returns (stream ChatChunk);
-}
+代码示例：
 
-message ChatRequest {
-  string model_name = 1;
-  repeated Message messages = 2;
-  double temperature = 3;
-  int32 max_tokens = 4;
-  string user_id = 5;
-  string scene = 6;
-}
-
-message ChatResponse {
-  string content = 1;
-  Usage usage = 2;
-  ResponseMeta meta = 3;
-}
-
-message ChatChunk {
-  string delta = 1;
-  bool done = 2;
-  ErrorInfo error = 3;
-}
-```
+    service ModelGateway {
+      rpc Chat(ChatRequest) returns (ChatResponse);
+      rpc StreamChat(ChatRequest) returns (stream ChatChunk);
+    }
+    
+    message ChatRequest {
+      string model_name = 1;
+      repeated Message messages = 2;
+      double temperature = 3;
+      int32 max_tokens = 4;
+      string user_id = 5;
+      string scene = 6;
+    }
+    
+    message ChatResponse {
+      string content = 1;
+      Usage usage = 2;
+      ResponseMeta meta = 3;
+    }
+    
+    message ChatChunk {
+      string delta = 1;
+      bool done = 2;
+      ErrorInfo error = 3;
+    }
 
 这样定义有几个直接的好处：
 
@@ -421,31 +419,31 @@ message ChatChunk {
 
 更实用的做法，是按“接口定义、业务编排、基础设施适配、对外入口”这几个层次来组织：
 
-```text
-api/
-  ai/
-    model.proto
-    gateway.proto
+代码示例：
 
-internal/
-  biz/
-    ai_gateway.go
-    chat_session.go
-  service/
-    ai_service.go
-  data/
-    model_gateway.go
-    model_router.go
-    provider_openai.go
-    provider_qwen.go
-    provider_deepseek.go
-
-configs/
-  config.yaml
-
-cmd/
-  server/
-```
+    api/
+      ai/
+        model.proto
+        gateway.proto
+    
+    internal/
+      biz/
+        ai_gateway.go
+        chat_session.go
+      service/
+        ai_service.go
+      data/
+        model_gateway.go
+        model_router.go
+        provider_openai.go
+        provider_qwen.go
+        provider_deepseek.go
+    
+    configs/
+      config.yaml
+    
+    cmd/
+      server/
 
 这套组织方式的核心思路是：
 
@@ -502,7 +500,3 @@ cmd/
 - 如何在流式过程中做日志和审计
 
 如果你现在正准备把 AI 能力真正接进 Go 后端，这一块，基本就是最值得先补齐的拼图。
-
-如果你准备按专题顺着往下看，下一篇就从这里接：
-
-- 《如何实现 ChatGPT 一样的流式输出》
