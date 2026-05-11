@@ -37,14 +37,14 @@
 
 ## 推荐阅读顺序
 
-1. [Go 后端如何封装大模型调用层](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/Go后端如何封装大模型调用层/README.md)
-2. [如何实现 ChatGPT 一样的流式输出](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/如何实现 ChatGPT 一样的流式输出/README.md)
-3. [Provider 抽象该怎么设计](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/Provider%20抽象该怎么设计/README.md)
-4. [模型路由应该放在哪一层](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/模型路由应该放在哪一层/README.md)
-5. [超时重试限流应该怎么放进 AI 网关](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/超时重试限流应该怎么放进%20AI%20网关/README.md)
-6. [统一错误处理应该怎么做](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/统一错误处理应该怎么做/README.md)
-7. [AI 网关如何统计 Token 成本](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/AI%20网关如何统计%20Token%20成本/README.md)
-8. [AI 网关上线前要补齐哪些治理能力](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/AI%20网关上线前要补齐哪些治理能力/README.md)
+1. Go 后端如何封装大模型调用层
+2. 如何实现 ChatGPT 一样的流式输出
+3. Provider 抽象该怎么设计
+4. 模型路由应该放在哪一层
+5. 超时重试限流应该怎么放进 AI 网关
+6. 统一错误处理应该怎么做
+7. AI 网关如何统计 Token 成本
+8. AI 网关上线前要补齐哪些治理能力
 
 ## 这一组内容最后会落到什么结果
 

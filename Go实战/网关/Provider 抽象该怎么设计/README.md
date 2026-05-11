@@ -485,4 +485,4 @@ Provider 抽象这件事，最容易走向两个极端：
 
 顺着这一组继续读，下一篇就在这里：
 
-- [模型路由应该放在哪一层](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/模型路由应该放在哪一层/README.md)
+- 《模型路由应该放在哪一层》

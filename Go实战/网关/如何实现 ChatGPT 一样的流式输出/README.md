@@ -773,4 +773,4 @@ func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
 
 如果你想按专题顺着往下走，更推荐先接这篇：
 
-- [Provider 抽象该怎么设计](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/Provider%20抽象该怎么设计/README.md)
+- 《Provider 抽象该怎么设计》

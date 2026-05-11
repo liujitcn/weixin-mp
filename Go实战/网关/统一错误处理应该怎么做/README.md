@@ -420,4 +420,4 @@ Provider 层最应该做的，不是发明新错误体系。
 
 顺着这一组继续读，下一篇就在这里：
 
-- [AI 网关如何统计 Token 成本](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/AI%20网关如何统计%20Token%20成本/README.md)
+- 《AI 网关如何统计 Token 成本》

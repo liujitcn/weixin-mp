@@ -48,7 +48,7 @@ if err != nil {
 
 很多项目一开始，都是这样长出来的：
 
-![直接调用的问题](images/02_direct_sdk_problem.png)
+（配图：直接调用的问题）
 
 业务代码里直接调模型客户端，最大的问题从来不是“写得不优雅”，而是：
 
@@ -118,7 +118,7 @@ if err != nil {
 
 更直观点，可以看成这样：
 
-![调用层整体结构](images/03_gateway_layer_arch.png)
+（配图：调用层整体结构）
 
 这层真正的价值，至少体现在五件事上。
 
@@ -249,7 +249,7 @@ message ChatChunk {
 
 一个比较稳的边界是：
 
-![模块边界图](images/04_module_boundary.png)
+（配图：模块边界图）
 
 ### 应该放进调用层的
 
@@ -285,7 +285,7 @@ message ChatChunk {
 
 更常见的，其实是下面这条链路：
 
-![请求生命周期](images/05_request_lifecycle.png)
+（配图：请求生命周期）
 
 这条链路里，每一层都应该只做自己那一层的事。
 
@@ -505,4 +505,4 @@ cmd/
 
 如果你准备按专题顺着往下看，下一篇就从这里接：
 
-- [如何实现 ChatGPT 一样的流式输出](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/如何实现%20ChatGPT%20一样的流式输出/README.md)
+- 《如何实现 ChatGPT 一样的流式输出》

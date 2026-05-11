@@ -436,4 +436,4 @@ func (g *Gateway) Chat(ctx context.Context, req *ChatRequest) (*ChatResponse, er
 
 顺着这一组继续读，下一篇就在这里：
 
-- [统一错误处理应该怎么做](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/统一错误处理应该怎么做/README.md)
+- 《统一错误处理应该怎么做》
