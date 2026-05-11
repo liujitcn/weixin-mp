@@ -1,9 +1,5 @@
 # Go 后端如何封装大模型调用层
 
-![封面图](images/01_cover_go_model_layer.svg)
-
----
-
 很多团队开始做 AI，第一步往往都很直接：
 
 先把模型接口调通。
@@ -42,7 +38,7 @@ if err != nil {
 
 很多项目一开始，都是这样长出来的：
 
-![直接调用的问题](images/02_direct_sdk_problem.svg)
+![直接调用的问题](images/02_direct_sdk_problem.png)
 
 业务代码里直接调模型客户端，最大的问题从来不是“写得不优雅”，而是：
 
@@ -112,7 +108,7 @@ if err != nil {
 
 更直观点，可以看成这样：
 
-![调用层整体结构](images/03_gateway_layer_arch.svg)
+![调用层整体结构](images/03_gateway_layer_arch.png)
 
 这层真正的价值，至少体现在五件事上。
 
@@ -243,7 +239,7 @@ message ChatChunk {
 
 一个比较稳的边界是：
 
-![模块边界图](images/04_module_boundary.svg)
+![模块边界图](images/04_module_boundary.png)
 
 ### 应该放进调用层的
 
@@ -279,7 +275,7 @@ message ChatChunk {
 
 更常见的，其实是下面这条链路：
 
-![请求生命周期](images/05_request_lifecycle.svg)
+![请求生命周期](images/05_request_lifecycle.png)
 
 这条链路里，每一层都应该只做自己那一层的事。
 
@@ -479,7 +475,7 @@ cmd/
 
 ---
 
-## 09 这篇文章落地后的下一步
+## 09 下一步应该怎么做
 
 如果这一层已经抽出来，接下来最自然的一步，就是继续把流式输出这件事补完整。
 
