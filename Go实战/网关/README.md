@@ -1,0 +1,65 @@
+# AI 网关专题
+
+---
+
+这一组内容，围绕一个很具体的问题展开：
+
+> **Go 后端里，怎么把大模型调用做成一层真正可上线的 AI 网关。**
+
+这里不会只讲“怎么调通一个模型接口”。
+
+更关注的是：
+
+- 不同模型厂商怎么统一
+- 流式输出怎么稳定返回
+- 路由、超时、重试、限流放在哪里
+- Token 成本怎么统计
+- 出错以后怎么归一化处理
+- 上线前到底要补齐哪些治理能力
+
+这条专题，适合这些场景的开发者：
+
+- 企业知识库
+- AI 助手
+- 智能客服
+- 智能工单
+- 内部问答系统
+- Agent 调用入口
+
+如果你现在正准备把 AI 能力接进 Go 服务，这一组文章可以按顺序读下去。
+
+如果你更偏“边看边落地”，也可以按这个节奏来：
+
+- 先看第 1、2 篇，把调用入口和流式链路立住
+- 再看第 3、4 篇，把 Provider 和路由边界想清楚
+- 接着看第 5、6、7 篇，把治理、错误和成本收口
+- 最后看第 8 篇，按上线视角把整套能力再检查一遍
+
+## 推荐阅读顺序
+
+1. [Go 后端如何封装大模型调用层](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/Go后端如何封装大模型调用层/README.md)
+2. [如何实现 ChatGPT 一样的流式输出](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/如何实现 ChatGPT 一样的流式输出/README.md)
+3. [Provider 抽象该怎么设计](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/Provider%20抽象该怎么设计/README.md)
+4. [模型路由应该放在哪一层](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/模型路由应该放在哪一层/README.md)
+5. [超时重试限流应该怎么放进 AI 网关](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/超时重试限流应该怎么放进%20AI%20网关/README.md)
+6. [统一错误处理应该怎么做](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/统一错误处理应该怎么做/README.md)
+7. [AI 网关如何统计 Token 成本](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/AI%20网关如何统计%20Token%20成本/README.md)
+8. [AI 网关上线前要补齐哪些治理能力](/Users/liujun/workspace/shop/weixin-mp/Go实战/网关/AI%20网关上线前要补齐哪些治理能力/README.md)
+
+## 这一组内容最后会落到什么结果
+
+如果把这套内容都走完，你最后拿到的不会只是几段调用示例。
+
+而会是一套比较完整的实现思路：
+
+- 一层统一的大模型调用入口
+- 一套稳定的请求 / 响应 / stream 协议
+- 一层屏蔽厂商差异的 Provider 适配层
+- 一套可解释的模型路由策略
+- 一组可上线的超时、重试、限流治理能力
+- 一条可核算的 Token 成本统计链路
+- 一份上线前治理检查清单
+
+一句话概括：
+
+> **把模型调用，从“能用”做成“能接进业务系统”。**
