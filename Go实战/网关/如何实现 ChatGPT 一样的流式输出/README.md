@@ -14,13 +14,13 @@
 
 代码示例：
 
-    resp, err := gateway.Chat(ctx, req)
-    if err != nil {
-    	return err
-    }
-    
-    return c.JSON(http.StatusOK, resp)
-
+resp, err := gateway.Chat(ctx, req)<br>
+if err != nil {<br>
+　　return err<br>
+}<br>
+<br>
+return c.JSON(http.StatusOK, resp)<br>
+<br>
 这种方式当然能跑。
 
 但用户体验通常会很一般。
@@ -65,6 +65,8 @@
 一个更贴近工程实现的定义应该是：
 
 > **后端在模型持续生成内容的过程中，把增量结果按统一协议实时推送给前端，并能正确处理结束、报错、中断和审计。**
+
+![流式输出链路拆分示意](./images/02_stream_sse_lifecycle.png)
 
 这里至少有四个关键词。
 
@@ -126,11 +128,11 @@
 
 代码示例：
 
-    前端发起请求
-    后端直接调用模型 SDK 的 stream 接口
-    拿到一段内容就 write 一次
-    最后 close 掉连接
-
+前端发起请求<br>
+后端直接调用模型 SDK 的 stream 接口<br>
+拿到一段内容就 write 一次<br>
+最后 close 掉连接<br>
+<br>
 Demo 阶段这没什么问题。
 
 但只要准备往线上走，问题很快就会出现。
@@ -245,15 +247,17 @@ WebSocket 更强，但也更重。
 
 把它拆开看，会更清楚：
 
+![流式输出完整链路](./images/02_stream_sse_lifecycle.png)
+
 代码示例：
 
-    浏览器
-      -> HTTP Handler
-      -> App Service / Biz
-      -> AI Gateway
-      -> Provider Adapter
-      -> Model Vendor Stream
-
+浏览器<br>
+　-> HTTP Handler<br>
+　-> App Service / Biz<br>
+　-> AI Gateway<br>
+　-> Provider Adapter<br>
+　-> Model Vendor Stream<br>
+<br>
 每一层都只做自己那一层的事。
 
 ### HTTP Handler
@@ -322,36 +326,36 @@ WebSocket 更强，但也更重。
 
 代码示例：
 
-    type StreamEvent string
-    
-    const (
-    	StreamEventDelta StreamEvent = "delta"
-    	StreamEventDone  StreamEvent = "done"
-    	StreamEventError StreamEvent = "error"
-    )
-    
-    // StreamChunk 表示网关对外统一的流式返回结构。
-    type StreamChunk struct {
-    	Event   StreamEvent `json:"event"`
-    	Content string      `json:"content,omitempty"`
-    	TraceID string      `json:"traceID,omitempty"`
-    	Model   string      `json:"model,omitempty"`
-    	Done    bool        `json:"done,omitempty"`
-    	Error   *ErrorInfo  `json:"error,omitempty"`
-    	Usage   *Usage      `json:"usage,omitempty"`
-    }
-    
-    type ErrorInfo struct {
-    	Code    string `json:"code"`
-    	Message string `json:"message"`
-    }
-    
-    type Usage struct {
-    	PromptTokens     int64 `json:"promptTokens"`
-    	CompletionTokens int64 `json:"completionTokens"`
-    	TotalTokens      int64 `json:"totalTokens"`
-    }
-
+type StreamEvent string<br>
+<br>
+const (<br>
+　　StreamEventDelta StreamEvent = "delta"<br>
+　　StreamEventDone  StreamEvent = "done"<br>
+　　StreamEventError StreamEvent = "error"<br>
+)<br>
+<br>
+// StreamChunk 表示网关对外统一的流式返回结构。<br>
+type StreamChunk struct {<br>
+　　Event   StreamEvent `json:"event"`<br>
+　　Content string      `json:"content,omitempty"`<br>
+　　TraceID string      `json:"traceID,omitempty"`<br>
+　　Model   string      `json:"model,omitempty"`<br>
+　　Done    bool        `json:"done,omitempty"`<br>
+　　Error   *ErrorInfo  `json:"error,omitempty"`<br>
+　　Usage   *Usage      `json:"usage,omitempty"`<br>
+}<br>
+<br>
+type ErrorInfo struct {<br>
+　　Code    string `json:"code"`<br>
+　　Message string `json:"message"`<br>
+}<br>
+<br>
+type Usage struct {<br>
+　　PromptTokens     int64 `json:"promptTokens"`<br>
+　　CompletionTokens int64 `json:"completionTokens"`<br>
+　　TotalTokens      int64 `json:"totalTokens"`<br>
+}<br>
+<br>
 这个结构里，第一版最值得保留的字段有四类：
 
 ### 1. 事件类型
@@ -382,16 +386,20 @@ WebSocket 更强，但也更重。
 
 代码示例：
 
-    // StreamWriter 负责把统一 chunk 发给上层调用方。
-    type StreamWriter interface {
-    	WriteChunk(ctx context.Context, chunk *StreamChunk) error
-    }
-    
-    // Gateway 定义对外暴露的流式调用能力。
-    type Gateway interface {
-    	StreamChat(ctx context.Context, req *ChatRequest, writer StreamWriter) error
-    }
-
+// StreamWriter 负责把统一 chunk 发给上层调用方。<br>
+type StreamWriter interface {<br>
+　　WriteChunk(ctx context.Context, chunk *StreamChunk) error<br>
+}<br>
+<br>
+// Gateway 定义对外暴露的流式调用能力。<br>
+type Gateway interface {<br>
+　　StreamChat(<br>
+　　　　ctx context.Context,<br>
+　　　　req *ChatRequest,<br>
+　　　　writer StreamWriter,<br>
+　　) error<br>
+}<br>
+<br>
 这个抽象有两个好处。
 
 ### 第一，不把协议绑死在 HTTP 层
@@ -426,88 +434,98 @@ WebSocket 更强，但也更重。
 
 代码示例：
 
-    type SSEWriter struct {
-    	writer  http.ResponseWriter
-    	flusher http.Flusher
-    }
-    
-    func NewSSEWriter(w http.ResponseWriter) (*SSEWriter, error) {
-    	flusher, ok := w.(http.Flusher)
-    	if !ok {
-    		return nil, errors.New("response writer does not support flush")
-    	}
-    
-    	return &SSEWriter{
-    		writer:  w,
-    		flusher: flusher,
-    	}, nil
-    }
-    
-    func (w *SSEWriter) WriteChunk(ctx context.Context, chunk *StreamChunk) error {
-    	select {
-    	case <-ctx.Done():
-    		return ctx.Err()
-    	default:
-    	}
-    
-    	payload, err := json.Marshal(chunk)
-    	if err != nil {
-    		return fmt.Errorf("marshal stream chunk: %w", err)
-    	}
-    
-    	_, err = fmt.Fprintf(w.writer, "event: %s\n", chunk.Event)
-    	if err != nil {
-    		return fmt.Errorf("write sse event: %w", err)
-    	}
-    
-    	_, err = fmt.Fprintf(w.writer, "data: %s\n\n", payload)
-    	if err != nil {
-    		return fmt.Errorf("write sse data: %w", err)
-    	}
-    
-    	w.flusher.Flush()
-    	return nil
-    }
-
+type SSEWriter struct {<br>
+　　writer  http.ResponseWriter<br>
+　　flusher http.Flusher<br>
+}<br>
+<br>
+func NewSSEWriter(<br>
+　　w http.ResponseWriter,<br>
+) (*SSEWriter, error) {<br>
+　　flusher, ok := w.(http.Flusher)<br>
+　　if !ok {<br>
+　　　　return nil, errors.New(<br>
+　　　　　　"response writer does not support flush",<br>
+　　　　)<br>
+　　}<br>
+<br>
+　　return &SSEWriter{<br>
+　　　　writer:  w,<br>
+　　　　flusher: flusher,<br>
+　　}, nil<br>
+}<br>
+<br>
+func (w *SSEWriter) WriteChunk(<br>
+　　ctx context.Context,<br>
+　　chunk *StreamChunk,<br>
+) error {<br>
+　　select {<br>
+　　case <-ctx.Done():<br>
+　　　　return ctx.Err()<br>
+　　default:<br>
+　　}<br>
+<br>
+　　payload, err := json.Marshal(chunk)<br>
+　　if err != nil {<br>
+　　　　return fmt.Errorf("marshal stream chunk: %w", err)<br>
+　　}<br>
+<br>
+　　_, err = fmt.Fprintf(w.writer, "event: %s\n", chunk.Event)<br>
+　　if err != nil {<br>
+　　　　return fmt.Errorf("write sse event: %w", err)<br>
+　　}<br>
+<br>
+　　_, err = fmt.Fprintf(w.writer, "data: %s\n\n", payload)<br>
+　　if err != nil {<br>
+　　　　return fmt.Errorf("write sse data: %w", err)<br>
+　　}<br>
+<br>
+　　w.flusher.Flush()<br>
+　　return nil<br>
+}<br>
+<br>
 HTTP 入口层则可以这样收口：
 
 代码示例：
 
-    func (h *Handler) StreamChat(w http.ResponseWriter, r *http.Request) {
-    	ctx := r.Context()
-    
-    	w.Header().Set("Content-Type", "text/event-stream")
-    	w.Header().Set("Cache-Control", "no-cache")
-    	w.Header().Set("Connection", "keep-alive")
-    	w.Header().Set("X-Accel-Buffering", "no")
-    
-    	writer, err := NewSSEWriter(w)
-    	if err != nil {
-    		http.Error(w, err.Error(), http.StatusInternalServerError)
-    		return
-    	}
-    
-    	req, err := h.buildChatRequest(r)
-    	if err != nil {
-    		http.Error(w, err.Error(), http.StatusBadRequest)
-    		return
-    	}
-    
-    	err = h.gateway.StreamChat(ctx, req, writer)
-    	if err != nil {
-    		streamErr := writer.WriteChunk(ctx, &StreamChunk{
-    			Event: StreamEventError,
-    			Error: &ErrorInfo{
-    				Code:    "stream_failed",
-    				Message: err.Error(),
-    			},
-    		})
-    		if streamErr != nil {
-    			return
-    		}
-    	}
-    }
-
+func (h *Handler) StreamChat(<br>
+　　w http.ResponseWriter,<br>
+　　r *http.Request,<br>
+) {<br>
+　　ctx := r.Context()<br>
+<br>
+　　w.Header().Set("Content-Type", "text/event-stream")<br>
+　　w.Header().Set("Cache-Control", "no-cache")<br>
+　　w.Header().Set("Connection", "keep-alive")<br>
+　　w.Header().Set("X-Accel-Buffering", "no")<br>
+<br>
+　　writer, err := NewSSEWriter(w)<br>
+　　if err != nil {<br>
+　　　　http.Error(w, err.Error(), http.StatusInternalServerError)<br>
+　　　　return<br>
+　　}<br>
+<br>
+　　req, err := h.buildChatRequest(r)<br>
+　　if err != nil {<br>
+　　　　http.Error(w, err.Error(), http.StatusBadRequest)<br>
+　　　　return<br>
+　　}<br>
+<br>
+　　err = h.gateway.StreamChat(ctx, req, writer)<br>
+　　if err != nil {<br>
+　　　　streamErr := writer.WriteChunk(ctx, &StreamChunk{<br>
+　　　　　　Event: StreamEventError,<br>
+　　　　　　Error: &ErrorInfo{<br>
+　　　　　　　　Code:    "stream_failed",<br>
+　　　　　　　　Message: err.Error(),<br>
+　　　　　　},<br>
+　　　　})<br>
+　　　　if streamErr != nil {<br>
+　　　　　　return<br>
+　　　　}<br>
+　　}<br>
+}<br>
+<br>
 这个实现里，有几个点很关键。
 
 ### `Content-Type` 必须是 `text/event-stream`
@@ -544,25 +562,25 @@ HTTP 入口层则可以这样收口：
 
 代码示例：
 
-    {
-      "choices": [
-        {
-          "delta": {
-            "content": "你好"
-          }
-        }
-      ]
-    }
-
+{<br>
+　"choices": [<br>
+　　{<br>
+　　　"delta": {<br>
+　　　　"content": "你好"<br>
+　　　}<br>
+　　}<br>
+　]<br>
+}<br>
+<br>
 适配层应该把它转成：
 
 代码示例：
 
-    {
-      "event": "delta",
-      "content": "你好"
-    }
-
+{<br>
+　"event": "delta",<br>
+　"content": "你好"<br>
+}<br>
+<br>
 这样前端永远只看统一协议。
 
 ### 2. 识别结束信号
@@ -607,16 +625,16 @@ HTTP 入口层则可以这样收口：
 
 代码示例：
 
-    {
-      "event": "done",
-      "done": true,
-      "usage": {
-        "promptTokens": 120,
-        "completionTokens": 260,
-        "totalTokens": 380
-      }
-    }
-
+{<br>
+　"event": "done",<br>
+　"done": true,<br>
+　"usage": {<br>
+　　"promptTokens": 120,<br>
+　　"completionTokens": 260,<br>
+　　"totalTokens": 380<br>
+　}<br>
+}<br>
+<br>
 这样前端逻辑会清楚很多。
 
 - `delta`：持续拼接文本

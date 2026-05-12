@@ -10,11 +10,11 @@
 
 代码示例：
 
-    resp, err := client.ChatCompletion(ctx, req)
-    if err != nil {
-    	return err
-    }
-
+resp, err := client.ChatCompletion(ctx, req)<br>
+if err != nil {<br>
+　　return err<br>
+}<br>
+<br>
 如果只是为了验证效果，这样写一点问题都没有。
 
 但只要准备把它接进真实业务系统，问题很快就会冒出来：
@@ -46,7 +46,7 @@
 
 很多项目一开始，都是这样长出来的：
 
-（配图：直接调用的问题）
+![业务代码直接调用模型客户端的问题](./images/02_direct_sdk_problem.png)
 
 业务代码里直接调模型客户端，最大的问题从来不是“写得不优雅”，而是：
 
@@ -116,7 +116,7 @@
 
 更直观点，可以看成这样：
 
-（配图：调用层整体结构）
+![大模型调用层整体结构](./images/03_gateway_layer_arch.png)
 
 这层真正的价值，至少体现在五件事上。
 
@@ -199,32 +199,32 @@
 
 代码示例：
 
-    service ModelGateway {
-      rpc Chat(ChatRequest) returns (ChatResponse);
-      rpc StreamChat(ChatRequest) returns (stream ChatChunk);
-    }
-    
-    message ChatRequest {
-      string model_name = 1;
-      repeated Message messages = 2;
-      double temperature = 3;
-      int32 max_tokens = 4;
-      string user_id = 5;
-      string scene = 6;
-    }
-    
-    message ChatResponse {
-      string content = 1;
-      Usage usage = 2;
-      ResponseMeta meta = 3;
-    }
-    
-    message ChatChunk {
-      string delta = 1;
-      bool done = 2;
-      ErrorInfo error = 3;
-    }
-
+service ModelGateway {<br>
+　rpc Chat(ChatRequest) returns (ChatResponse);<br>
+　rpc StreamChat(ChatRequest) returns (stream ChatChunk);<br>
+}<br>
+<br>
+message ChatRequest {<br>
+　string model_name = 1;<br>
+　repeated Message messages = 2;<br>
+　double temperature = 3;<br>
+　int32 max_tokens = 4;<br>
+　string user_id = 5;<br>
+　string scene = 6;<br>
+}<br>
+<br>
+message ChatResponse {<br>
+　string content = 1;<br>
+　Usage usage = 2;<br>
+　ResponseMeta meta = 3;<br>
+}<br>
+<br>
+message ChatChunk {<br>
+　string delta = 1;<br>
+　bool done = 2;<br>
+　ErrorInfo error = 3;<br>
+}<br>
+<br>
 这样定义有几个直接的好处：
 
 - 业务侧只关心“我要问什么”
@@ -247,7 +247,7 @@
 
 一个比较稳的边界是：
 
-（配图：模块边界图）
+![大模型调用层的模块边界](./images/04_module_boundary.png)
 
 ### 应该放进调用层的
 
@@ -283,7 +283,7 @@
 
 更常见的，其实是下面这条链路：
 
-（配图：请求生命周期）
+![大模型请求生命周期](./images/05_request_lifecycle.png)
 
 这条链路里，每一层都应该只做自己那一层的事。
 
@@ -421,30 +421,30 @@
 
 代码示例：
 
-    api/
-      ai/
-        model.proto
-        gateway.proto
-    
-    internal/
-      biz/
-        ai_gateway.go
-        chat_session.go
-      service/
-        ai_service.go
-      data/
-        model_gateway.go
-        model_router.go
-        provider_openai.go
-        provider_qwen.go
-        provider_deepseek.go
-    
-    configs/
-      config.yaml
-    
-    cmd/
-      server/
-
+api/<br>
+　ai/<br>
+　　model.proto<br>
+　　gateway.proto<br>
+<br>
+internal/<br>
+　biz/<br>
+　　ai_gateway.go<br>
+　　chat_session.go<br>
+　service/<br>
+　　ai_service.go<br>
+　data/<br>
+　　model_gateway.go<br>
+　　model_router.go<br>
+　　provider_openai.go<br>
+　　provider_qwen.go<br>
+　　provider_deepseek.go<br>
+<br>
+configs/<br>
+　config.yaml<br>
+<br>
+cmd/<br>
+　server/<br>
+<br>
 这套组织方式的核心思路是：
 
 - `api` 放接口契约和对外能力定义

@@ -54,6 +54,8 @@ AI 网关做到这一步，通常已经开始有这些能力了：
 
 > **不管底层是哪一家 provider，网关对上层都应该提供稳定、可判断的错误分类。**
 
+![统一错误语义映射](./images/02_error_normalization_map.png)
+
 因为业务层真正关心的不是：
 
 - 这句英文报错长什么样
@@ -78,8 +80,8 @@ AI 网关做到这一步，通常已经开始有这些能力了：
 
 代码示例：
 
-    return nil, err
-
+return nil, err<br>
+<br>
 短期最省事。
 
 但一旦接多家 provider，就会出现：
@@ -94,14 +96,14 @@ AI 网关做到这一步，通常已经开始有这些能力了：
 
 代码示例：
 
-    return fmt.Errorf("call qwen failed: %w", err)
-
+return fmt.Errorf("call qwen failed: %w", err)<br>
+<br>
 再上一层：
 
 代码示例：
 
-    return fmt.Errorf("gateway chat failed: %w", err)
-
+return fmt.Errorf("gateway chat failed: %w", err)<br>
+<br>
 最后你拿到一长串上下文，但仍然回答不了：
 
 > 这到底是超时、限流、参数错误，还是 provider 故障？
@@ -189,33 +191,35 @@ AI 网关做到这一步，通常已经开始有这些能力了：
 
 很多团队只定义 error type，不定义结构化返回。
 
+![错误归一化层示意](./images/02_error_normalization_map.png)
+
 但在 AI 网关里，最好统一一个结构。
 
 例如：
 
 代码示例：
 
-    type ErrorCode string
-    
-    const (
-    	ErrorCodeInvalidRequest      ErrorCode = "invalid_request"
-    	ErrorCodeUnauthorized        ErrorCode = "unauthorized"
-    	ErrorCodeRateLimited         ErrorCode = "rate_limited"
-    	ErrorCodeTimeout             ErrorCode = "timeout"
-    	ErrorCodeProviderUnavailable ErrorCode = "provider_unavailable"
-    	ErrorCodeModelNotFound       ErrorCode = "model_not_found"
-    	ErrorCodeInternal            ErrorCode = "internal"
-    )
-    
-    type GatewayError struct {
-    	Code      ErrorCode
-    	Message   string
-    	Provider  string
-    	Model     string
-    	Retryable bool
-    	Cause     error
-    }
-
+type ErrorCode string<br>
+<br>
+const (<br>
+　　ErrorCodeInvalidRequest      ErrorCode = "invalid_request"<br>
+　　ErrorCodeUnauthorized        ErrorCode = "unauthorized"<br>
+　　ErrorCodeRateLimited         ErrorCode = "rate_limited"<br>
+　　ErrorCodeTimeout             ErrorCode = "timeout"<br>
+　　ErrorCodeProviderUnavailable ErrorCode = "provider_unavailable"<br>
+　　ErrorCodeModelNotFound       ErrorCode = "model_not_found"<br>
+　　ErrorCodeInternal            ErrorCode = "internal"<br>
+)<br>
+<br>
+type GatewayError struct {<br>
+　　Code      ErrorCode<br>
+　　Message   string<br>
+　　Provider  string<br>
+　　Model     string<br>
+　　Retryable bool<br>
+　　Cause     error<br>
+}<br>
+<br>
 这一版里，最有价值的字段通常是：
 
 ### `Code`
